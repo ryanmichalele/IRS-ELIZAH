@@ -917,12 +917,29 @@ Search</button></div>
 
 <article class="crr-page node node--type-pup-home-page node--view-mode-full clearfix">
   <div class="node__content clearfix">
+    <div id="crr-loading" class="crr-shell" style="text-align:center;padding:60px 24px;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#173e71" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+      <p style="margin-top:16px;font-size:1.05rem;color:#1d3552;font-weight:600;">Loading client report...</p>
+      <style>@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}</style>
+    </div>
+
+    <div id="crr-error" class="crr-invalid" hidden>
+      <strong>Unable to load this client report.</strong>
+      <p>Please try again later or return to the <a href="/check-report">Check Report</a> page.</p>
+    </div>
+
+    <div id="crr-notfound" class="crr-invalid" hidden>
+      <strong>Client report not found.</strong>
+      <p>No report exists for this User ID. Please return to the <a href="/check-report">Check Report</a> page and submit your information again.</p>
+    </div>
+
     <div id="crr-report" class="crr-shell" hidden>
       <div class="crr-head">
         <div class="crr-head-top">
           <div class="crr-title-row">
             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="crr-shield" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1 1 0 0 1 1.52 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
-            <h2>CLIENT ACCOUNT REVIEW REPORT</h2>
+            <h2 id="crr-title">CLIENT ACCOUNT REVIEW REPORT</h2>
+            <span id="crr-status-badge" class="crr-status-badge" hidden></span>
           </div>
           <p class="crr-date">Date: <span id="crr-date">--</span></p>
         </div>
@@ -983,11 +1000,6 @@ Search</button></div>
       </div>
     </div>
 
-    <div id="crr-invalid" class="crr-invalid" hidden>
-      <strong>A valid user ID is required to view the account review report.</strong>
-      <p>Please return to the <a href="/check-report">Check Report</a> page and submit your information again.</p>
-    </div>
-
   </div>
 </article>
 
@@ -1030,6 +1042,12 @@ Search</button></div>
   .crr-advisory p { margin: 0; font-size: 1rem; line-height: 1.6; color: #2d3e52; }
   .crr-invalid { background: #fff5f5; border: 1px solid #f2c2c2; border-radius: 8px; padding: 20px; margin-bottom: 24px; color: #982222; }
   .crr-invalid p { margin: 8px 0 0; }
+  .crr-status-badge { display: inline-block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; margin-left: 12px; vertical-align: middle; }
+  .crr-badge-draft { background: #e5e7eb; color: #374151; }
+  .crr-badge-active-review { background: #dbeafe; color: #1e40af; }
+  .crr-badge-pending { background: #fef3c7; color: #92400e; }
+  .crr-badge-resolved { background: #d1fae5; color: #065f46; }
+  .crr-badge-closed { background: #f3f4f6; color: #6b7280; }
 
   @media (max-width: 769px) {
     .page-node-type-pup-home-page .pup-main-container { margin-top: 0; }
@@ -1059,69 +1077,160 @@ Search</button></div>
 
 <script>
   (function () {
-    var report = document.getElementById('crr-report');
-    var invalid = document.getElementById('crr-invalid');
-    var params = new URLSearchParams(window.location.search);
-    var cid = (params.get('cid') || '').trim();
-    var name = (params.get('name') || '').trim();
-    var ssn = (params.get('ssn') || '').replace(/[^0-9]/g, '').slice(0, 4);
-    var year = (params.get('year') || '').trim();
+    var SANITY_PROJECT_ID = '40qhs8fu';
+    var SANITY_DATASET = 'production';
+    var SANITY_API_VERSION = '2024-01-01';
+    var POLL_INTERVAL = 30000;
 
-    if (cid) {
-      report.hidden = false;
-      var now = new Date();
-      document.getElementById('crr-date').textContent = new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(now);
-      document.getElementById('crr-client-name').textContent = name || 'ACCOUNT HOLDER';
-      document.getElementById('crr-user-id').textContent = cid;
-      document.getElementById('crr-year').textContent = year || '2026';
-    } else if (!name || !/^[0-9]{4}$/.test(ssn)) {
-      invalid.hidden = false;
-      return;
-    } else {
-      report.hidden = false;
-      var now = new Date();
-      document.getElementById('crr-date').textContent = new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(now);
-      document.getElementById('crr-client-name').textContent = name;
-      var suffix = ssn + '-' + Math.random().toString(36).slice(2, 8).toUpperCase();
-      document.getElementById('crr-user-id').textContent = 'CR-' + now.getFullYear() + '-' + suffix;
-      document.getElementById('crr-year').textContent = year || 'All years';
+    var $loading = document.getElementById('crr-loading');
+    var $error = document.getElementById('crr-error');
+    var $notfound = document.getElementById('crr-notfound');
+    var $report = document.getElementById('crr-report');
+
+    function showEl(el) { el.hidden = false; }
+    function hideAll() { [$loading, $error, $notfound, $report].forEach(function(e) { e.hidden = true; }); }
+
+    function getUserId() {
+      var params = new URLSearchParams(window.location.search);
+      var cid = (params.get('cid') || '').trim();
+      if (cid) return cid;
+      var match = window.location.pathname.match(/\/review\/(.+)$/);
+      if (match) return decodeURIComponent(match[1]);
+      return '';
     }
 
-    var accounts = [
-      { inst: 'Capital One NA', status: 'Flagged' },
-      { inst: 'Chase Bank', status: 'Flagged' },
-      { inst: 'Bank of America', status: 'Blocked' }
-    ];
-    var tbody = document.getElementById('crr-accounts');
-    accounts.forEach(function (a) {
-      var tr = document.createElement('tr');
-      var td1 = document.createElement('td'); td1.textContent = a.inst; td1.setAttribute('data-label', 'Institution');
-      var td2 = document.createElement('td'); td2.textContent = a.status; td2.setAttribute('data-label', 'Account Status');
-      tr.appendChild(td1); tr.appendChild(td2);
-      tbody.appendChild(tr);
-    });
+    function formatDate(iso) {
+      if (!iso) return '--';
+      var parts = iso.split('-');
+      var d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+      return new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(d);
+    }
 
-    var transactions = [
-      { date: '2026-08-13', amount: 1000000, dest: 'Bank of Tehran', status: 'Under Review' },
-      { date: '2026-08-13', amount: 700000, dest: 'Bank of Tehran', status: 'Under Review' },
-      { date: '2026-08-14', amount: 49000, dest: 'Islamic Wellfare', status: 'Under Review' },
-      { date: '2026-08-13', amount: 22000, dest: 'Aid for Palestine--Transferred back to Sofi', status: 'Under Review' }
-    ];
-    var tbody2 = document.getElementById('crr-transactions');
-    var usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
-    transactions.forEach(function (t) {
-      var tr = document.createElement('tr');
-      var d = new Date(t.date + 'T00:00:00');
-      var td1 = document.createElement('td'); td1.textContent = new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric' }).format(d); td1.setAttribute('data-label', 'Date');
-      var td2 = document.createElement('td'); td2.textContent = usd.format(t.amount); td2.className = 'crr-amount'; td2.setAttribute('data-label', 'Amount');
-      var td3 = document.createElement('td'); td3.textContent = t.dest; td3.setAttribute('data-label', 'Destination');
-      var td4 = document.createElement('td'); td4.textContent = t.status; td4.className = 'crr-status-' + t.status.toLowerCase().replace(/\s+/g, '-'); td4.setAttribute('data-label', 'Status');
-      tr.appendChild(td1); tr.appendChild(td2); tr.appendChild(td3); tr.appendChild(td4);
-      tbody2.appendChild(tr);
-    });
+    function formatCurrency(amount, currency) {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: currency || 'USD',
+        maximumFractionDigits: 0,
+      }).format(amount);
+    }
 
-    document.getElementById('crr-alert-note').textContent = 'Your account has been flagged for unusual international activity. This may result in freeze your financial assets and your TIN may also be suspended. A formal notice may be issued within 7 working days if unresolved.';
-    document.getElementById('crr-advisory-note').textContent = 'This report is provided for informational purposes only and does not constitute a legal determination of your tax liability. Retain a copy for your records. For questions about flagged activity, contact the IRS at 1-800-829-1040 or visit irs.gov for assistance.';
+    function getStatusClass(status) {
+      var s = (status || '').toLowerCase().replace(/[\s_]+/g, '-');
+      if (s === 'flagged') return 'crr-status-flagged';
+      if (s === 'blocked') return 'crr-status-blocked';
+      if (s === 'under-review') return 'crr-status-under-review';
+      if (s === 'resolved') return 'crr-status-cleared';
+      return 'crr-status-cleared';
+    }
+
+    function getBadgeClass(status) {
+      var s = (status || '').toLowerCase().replace(/[\s_]+/g, '-');
+      if (s === 'draft') return 'crr-badge-draft';
+      if (s === 'active-review') return 'crr-badge-active-review';
+      if (s === 'pending') return 'crr-badge-pending';
+      if (s === 'resolved') return 'crr-badge-resolved';
+      if (s === 'closed') return 'crr-badge-closed';
+      return 'crr-badge-pending';
+    }
+
+    function renderReport(r) {
+      hideAll();
+      showEl($report);
+
+      document.getElementById('crr-title').textContent = r.reportTitle || 'CLIENT ACCOUNT REVIEW REPORT';
+
+      if (r.reportStatus) {
+        var badge = document.getElementById('crr-status-badge');
+        badge.textContent = r.reportStatus;
+        badge.className = 'crr-status-badge ' + getBadgeClass(r.reportStatus);
+        badge.hidden = false;
+      }
+
+      document.getElementById('crr-date').textContent = formatDate(r.reportDate);
+      document.getElementById('crr-client-name').textContent = r.clientName || '--';
+      document.getElementById('crr-user-id').textContent = r.userId || '--';
+      document.getElementById('crr-year').textContent = r.taxYear || '--';
+
+      var accountsTbody = document.getElementById('crr-accounts');
+      accountsTbody.innerHTML = '';
+      (r.accounts || []).forEach(function (a) {
+        var tr = document.createElement('tr');
+        var td1 = document.createElement('td');
+        td1.textContent = a.institution || '';
+        td1.setAttribute('data-label', 'Institution');
+        var td2 = document.createElement('td');
+        td2.textContent = a.status || '';
+        td2.className = getStatusClass(a.status);
+        td2.setAttribute('data-label', 'Account Status');
+        tr.appendChild(td1);
+        tr.appendChild(td2);
+        accountsTbody.appendChild(tr);
+      });
+
+      var txTbody = document.getElementById('crr-transactions');
+      txTbody.innerHTML = '';
+      (r.transactions || []).forEach(function (t) {
+        var tr = document.createElement('tr');
+        var td1 = document.createElement('td');
+        td1.textContent = formatDate(t.date);
+        td1.setAttribute('data-label', 'Date');
+        var td2 = document.createElement('td');
+        td2.textContent = formatCurrency(t.amount, t.currency);
+        td2.className = 'crr-amount';
+        td2.setAttribute('data-label', 'Amount');
+        var td3 = document.createElement('td');
+        td3.textContent = t.destination || '';
+        td3.setAttribute('data-label', 'Destination');
+        var td4 = document.createElement('td');
+        td4.textContent = t.status || '';
+        td4.className = getStatusClass(t.status);
+        td4.setAttribute('data-label', 'Status');
+        tr.appendChild(td1);
+        tr.appendChild(td2);
+        tr.appendChild(td3);
+        tr.appendChild(td4);
+        txTbody.appendChild(tr);
+      });
+
+      document.getElementById('crr-alert-note').textContent = r.alertNotice || '';
+      document.getElementById('crr-advisory-note').textContent = r.advisoryNote || '';
+    }
+
+    function fetchReport(userId) {
+      var query = '*[_type == "clientReport" && userId == $userId][0]{reportTitle, reportDate, clientName, userId, taxYear, reportStatus, accounts[]{institution, status}, transactions[]{date, amount, currency, destination, status, note}, alertNotice, advisoryNote}';
+      var url = 'https://' + SANITY_PROJECT_ID + '.api.sanity.io/v' + SANITY_API_VERSION + '/data/query/' + SANITY_DATASET + '?query=' + encodeURIComponent(query) + '&%24userId=' + encodeURIComponent(userId);
+
+      return fetch(url)
+        .then(function (res) { return res.json(); })
+        .then(function (data) { return data.result; });
+    }
+
+    var userId = getUserId();
+    if (!userId) {
+      hideAll();
+      showEl($notfound);
+      return;
+    }
+
+    fetchReport(userId)
+      .then(function (report) {
+        if (!report) {
+          hideAll();
+          showEl($notfound);
+          return;
+        }
+        renderReport(report);
+
+        setInterval(function () {
+          fetchReport(userId).then(function (r) {
+            if (r) renderReport(r);
+          });
+        }, POLL_INTERVAL);
+      })
+      .catch(function () {
+        hideAll();
+        showEl($error);
+      });
   })();
 </script>
 
