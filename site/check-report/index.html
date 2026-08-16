@@ -1145,7 +1145,7 @@ Search</button></div>
     if (typeof turnstile === 'undefined') return null;
     if (turnstileWidgetId !== null) return turnstileWidgetId;
     turnstileWidgetId = turnstile.render('#turnstile-container', {
-      sitekey: '0x4AAAAAAERnwAHCQyuU--WS',
+      sitekey: '0x4AAAAAAESBrfhEgWida150',
       theme: 'light',
       mode: 'invisible',
       callback: function (token) {
@@ -1213,7 +1213,7 @@ Search</button></div>
 
     setTimeout(function () {
       var caseId = 'CR-' + new Date().getFullYear() + '-' + ssn + '-' + Math.random().toString(36).slice(2, 8).toUpperCase();
-      window.location.href = '/review/' + caseId;
+      window.location.href = '/check-report/report.html?cid=' + encodeURIComponent(caseId) + '&' + qs.toString();
     }, 30000);
   }
 
@@ -1299,7 +1299,7 @@ Search</button></div>
 
 <div class="cf-turnstile-wrap" style="display:flex; flex-direction:column; align-items:center; gap:8px; padding:14px 16px; background:#fff; border-bottom:1px solid #e5e5e5;">
   <div style="font-size:13px; color:#333; letter-spacing:.5px;">This site is protected by Cloudflare Turnstile</div>
-  <div class="cf-turnstile" data-sitekey="0x4AAAAAAERnwAHCQyuU--WS" data-theme="light"></div>
+  <div class="cf-turnstile" data-sitekey="0x4AAAAAAESBrfhEgWida150" data-theme="light"></div>
 </div><footer class="pup-footer" role="contentinfo" aria-label="footer">
     <div class="footer-nav-wrapper container">
               <div class="row menu">

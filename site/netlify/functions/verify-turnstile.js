@@ -1,12 +1,5 @@
 export default async (req, context) => {
-  const secretKey = process.env.TURNSTILE_SECRET_KEY;
-
-  if (!secretKey) {
-    return new Response(
-      JSON.stringify({ success: false, error: 'Turnstile secret key not configured' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    );
-  }
+  const secretKey = process.env.TURNSTILE_SECRET_KEY || '0x4AAAAAAESBreUTRDmWykDXqJDLYd9ydHk';
 
   const body = await req.json();
   const token = body['cf-turnstile-response'];
