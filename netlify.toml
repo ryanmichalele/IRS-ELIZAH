@@ -8,7 +8,7 @@
 [[redirects]]
   from = "/review/:cid"
   to = "/check-report/report.html?cid=:cid"
-  status = 200
+  status = 302
 
 [[redirects]]
   from = "/*"
