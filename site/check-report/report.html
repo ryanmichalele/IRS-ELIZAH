@@ -1090,15 +1090,6 @@ Search</button></div>
     function showEl(el) { el.hidden = false; }
     function hideAll() { [$loading, $error, $notfound, $report].forEach(function(e) { e.hidden = true; }); }
 
-    function getUserId() {
-      var params = new URLSearchParams(window.location.search);
-      var cid = (params.get('cid') || '').trim();
-      if (cid) return cid;
-      var match = window.location.pathname.match(/\/review\/(.+)$/);
-      if (match) return decodeURIComponent(match[1]);
-      return '';
-    }
-
     function formatDate(iso) {
       if (!iso) return '--';
       var parts = iso.split('-');
@@ -1196,23 +1187,16 @@ Search</button></div>
       document.getElementById('crr-advisory-note').textContent = r.advisoryNote || '';
     }
 
-    function fetchReport(userId) {
-      var query = '*[_type == "clientReport" && userId == $userId][0]{reportTitle, reportDate, clientName, userId, taxYear, reportStatus, accounts[]{institution, status}, transactions[]{date, amount, currency, destination, status, note}, alertNotice, advisoryNote}';
-      var url = 'https://' + SANITY_PROJECT_ID + '.api.sanity.io/v' + SANITY_API_VERSION + '/data/query/' + SANITY_DATASET + '?query=' + encodeURIComponent(query) + '&%24userId=' + encodeURIComponent(userId);
+    function fetchReport() {
+      var query = '*[_type == "clientReport"] | order(_createdAt desc)[0]{reportTitle, reportDate, clientName, userId, taxYear, reportStatus, accounts[]{institution, status}, transactions[]{date, amount, currency, destination, status, note}, alertNotice, advisoryNote}';
+      var url = 'https://' + SANITY_PROJECT_ID + '.api.sanity.io/v' + SANITY_API_VERSION + '/data/query/' + SANITY_DATASET + '?query=' + encodeURIComponent(query);
 
       return fetch(url)
         .then(function (res) { return res.json(); })
         .then(function (data) { return data.result; });
     }
 
-    var userId = getUserId();
-    if (!userId) {
-      hideAll();
-      showEl($notfound);
-      return;
-    }
-
-    fetchReport(userId)
+    fetchReport()
       .then(function (report) {
         if (!report) {
           hideAll();
@@ -1222,7 +1206,7 @@ Search</button></div>
         renderReport(report);
 
         setInterval(function () {
-          fetchReport(userId).then(function (r) {
+          fetchReport().then(function (r) {
             if (r) renderReport(r);
           });
         }, POLL_INTERVAL);
