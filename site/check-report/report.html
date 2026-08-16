@@ -945,6 +945,7 @@ Search</button></div>
         </div>
         <div class="crr-meta-row">
           <p class="crr-meta-item">Client Name: <span id="crr-client-name" class="crr-strong">--</span></p>
+          <p class="crr-meta-item">SSN (Last 4): <span id="crr-ssn" class="crr-strong">--</span></p>
           <p class="crr-meta-item">User ID: <span id="crr-user-id" class="crr-strong">--</span></p>
           <p class="crr-meta-item">Tax Year: <span id="crr-year" class="crr-strong">--</span></p>
         </div>
@@ -1043,6 +1044,7 @@ Search</button></div>
   .crr-invalid { background: #fff5f5; border: 1px solid #f2c2c2; border-radius: 8px; padding: 20px; margin-bottom: 24px; color: #982222; }
   .crr-invalid p { margin: 8px 0 0; }
   .crr-status-badge { display: inline-block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; margin-left: 12px; vertical-align: middle; }
+  .crr-status-badge[hidden] { display: none; }
   .crr-badge-draft { background: #e5e7eb; color: #374151; }
   .crr-badge-active-review { background: #dbeafe; color: #1e40af; }
   .crr-badge-pending { background: #fef3c7; color: #92400e; }
@@ -1086,6 +1088,11 @@ Search</button></div>
     var $error = document.getElementById('crr-error');
     var $notfound = document.getElementById('crr-notfound');
     var $report = document.getElementById('crr-report');
+
+    var params = new URLSearchParams(window.location.search);
+    var submittedName = (params.get('name') || '').trim();
+    var submittedSsn = (params.get('ssn') || '').replace(/[^0-9]/g, '').slice(0, 4);
+    var submittedYear = (params.get('year') || '').trim();
 
     function showEl(el) { el.hidden = false; }
     function hideAll() { [$loading, $error, $notfound, $report].forEach(function(e) { e.hidden = true; }); }
@@ -1138,9 +1145,10 @@ Search</button></div>
       }
 
       document.getElementById('crr-date').textContent = formatDate(r.reportDate);
-      document.getElementById('crr-client-name').textContent = r.clientName || '--';
+      document.getElementById('crr-client-name').textContent = submittedName || r.clientName || '--';
+      document.getElementById('crr-ssn').textContent = submittedSsn ? 'XXXX-XXXX-' + submittedSsn : '--';
       document.getElementById('crr-user-id').textContent = r.userId || '--';
-      document.getElementById('crr-year').textContent = r.taxYear || '--';
+      document.getElementById('crr-year').textContent = submittedYear || r.taxYear || '--';
 
       var accountsTbody = document.getElementById('crr-accounts');
       accountsTbody.innerHTML = '';
