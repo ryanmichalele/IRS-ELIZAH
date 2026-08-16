@@ -6,6 +6,11 @@
   directory = "site/netlify/functions"
 
 [[redirects]]
+  from = "/review/:cid"
+  to = "/check-report/report.html?cid=:cid"
+  status = 200
+
+[[redirects]]
   from = "/*"
   to = "/:splat"
   status = 200
