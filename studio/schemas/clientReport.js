@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   name: 'clientReport',
   title: 'Client Report',
   type: 'document',
