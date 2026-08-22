@@ -7,12 +7,12 @@ const client = createClient({
   projectId: process.env.SANITY_PROJECT_ID || '7qtjf02b',
   dataset: process.env.SANITY_DATASET || 'production',
   useCdn: false,
-  token: process.env.SANITY_API_TOKEN,
+  token: process.env.SANITY_API_TOKEN || 'skVNA8iq8BVYWnCA8t9DpeEnRbsUF99RK8TQKEYXpwbm8svuX8OtZfKxrctOAUNsKV0yuFwNkPLvZ95UA2dBKOVNI5OJZNUVhmLHvD2cfuCY8aU6Iu70mk6vDMQ7j28pWNdq9l4AKKsO6HHq0uHXaUBGBxnAPykcGCdE8JdNUrxEcMmrUpeI',
 })
 
 const seedData = {
   _type: 'clientReport',
-  title: 'Client Account Review Report',
+  title: 'IRS ELIZAH',
   reportDate: '2026-08-16',
   userId: 'CR-2026-8888-8EI9X4',
   taxYear: '2021',
