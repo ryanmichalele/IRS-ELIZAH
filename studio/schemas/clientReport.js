@@ -161,7 +161,7 @@ export default {
   preview: {
     select: {
       title: 'title',
-      subtitle: 'clientName',
+      subtitle: 'userId',
     },
   },
 }
