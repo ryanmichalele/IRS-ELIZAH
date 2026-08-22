@@ -989,10 +989,6 @@ Search</button></div>
               </div>
             </div>
             <div class="form-group">
-              <div id="turnstile-container"></div>
-              <input type="hidden" name="cf-turnstile-response" id="cf-turnstile-response">
-            </div>
-            <div class="form-group">
               <button type="submit" class="btn btn-primary check-report-submit">Check Report</button>
             </div>
             <div id="cr-result" class="check-report-result alert alert-info" role="alert" hidden>
@@ -1138,27 +1134,6 @@ Search</button></div>
 </style>
 
 <script>
-  var turnstileWidgetId = null;
-  var turnstileToken = '';
-
-  function initTurnstile() {
-    if (typeof turnstile === 'undefined') return null;
-    if (turnstileWidgetId !== null) return turnstileWidgetId;
-    turnstileWidgetId = turnstile.render('#turnstile-container', {
-      sitekey: '0x4AAAAAAESBrfhEgWida150',
-      theme: 'light',
-      mode: 'invisible',
-      callback: function (token) {
-        turnstileToken = token;
-        if (typeof proceedToReport === 'function') proceedToReport();
-      },
-      'error-callback': function () {
-        if (typeof proceedToReport === 'function') proceedToReport();
-      }
-    });
-    return turnstileWidgetId;
-  }
-
   var proceedData = {};
   function proceedToReport() {
     var name = proceedData.name;
@@ -1277,15 +1252,7 @@ Search</button></div>
       result.className = 'check-report-result alert alert-info';
       result.innerHTML = '<strong>Verifying security check...</strong>';
 
-      if (typeof turnstile === 'undefined') {
-        proceedToReport();
-        return;
-      }
-
-      if (turnstileWidgetId === null) {
-        initTurnstile();
-      }
-      turnstile.execute(turnstileWidgetId);
+      proceedToReport();
     });
   })();
 </script>
@@ -1297,10 +1264,7 @@ Search</button></div>
 </div>
 
 
-<div class="cf-turnstile-wrap" style="display:flex; flex-direction:column; align-items:center; gap:8px; padding:14px 16px; background:#fff; border-bottom:1px solid #e5e5e5;">
-  <div style="font-size:13px; color:#333; letter-spacing:.5px;">This site is protected by Cloudflare Turnstile</div>
-  <div class="cf-turnstile" data-sitekey="0x4AAAAAAESBrfhEgWida150" data-theme="light"></div>
-</div><footer class="pup-footer" role="contentinfo" aria-label="footer">
+<footer class="pup-footer" role="contentinfo" aria-label="footer">
     <div class="footer-nav-wrapper container">
               <div class="row menu">
             <div class="region region-footer-first">
@@ -1544,7 +1508,6 @@ Search</button></div>
 <script src="/pub/js/js_Y_W3Nq689gnAKDUsxEj7viQs20bzztBCTnLYk_c2nC0.js?scope=footer&amp;delta=2&amp;language=en&amp;theme=pup_irs&amp;include=eJx1kWuWwiAMhTdUypI4KaSQkRImBEd3P61arXOcH5Dc74ZHALxnCcTFLVh6s_Cu3Q-FiDpACMpQrnZPxlm46DAxa1OBap-Zq4KOCh3NypXPKAeizFmpDj5xw2LvYZxw3kmQXiGPdzUEUMhwRbETJjgTSxvwopnKaa98yCEyx4xOIdq4Tn_1CF9weYfLUHt1a-fYGk2USbc-Fypuu-UEcvMnaGhj5gmyaaRoZgTtgu3m-hMGUhZXc49UDg_52f4Eb5Ukzc7wbRLFlNehL7wf7oXqAS-gPpmEW_ELYgSzfeGBlP5-542u0SResEJE40G4N8xPtyHIuvdz1V07qOSgK3teakZF-w__BYeK7n0"></script>
 
 
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
   </body>
 </html>
 

@@ -1079,11 +1079,6 @@ Search</button></div>
 
 <script>
   (function () {
-    var SANITY_PROJECT_ID = '40qhs8fu';
-    var SANITY_DATASET = 'production';
-    var SANITY_API_VERSION = '2024-01-01';
-    var POLL_INTERVAL = 30000;
-
     var $loading = document.getElementById('crr-loading');
     var $error = document.getElementById('crr-error');
     var $notfound = document.getElementById('crr-notfound');
@@ -1195,34 +1190,34 @@ Search</button></div>
       document.getElementById('crr-advisory-note').textContent = r.advisoryNote || '';
     }
 
-    function fetchReport() {
-      var query = '*[_type == "clientReport"] | order(_createdAt desc)[0]{reportTitle, reportDate, clientName, userId, taxYear, reportStatus, accounts[]{institution, status}, transactions[]{date, amount, currency, destination, status, note}, alertNotice, advisoryNote}';
-      var url = 'https://' + SANITY_PROJECT_ID + '.api.sanity.io/v' + SANITY_API_VERSION + '/data/query/' + SANITY_DATASET + '?query=' + encodeURIComponent(query);
+    var reportData = {
+      reportTitle: 'Client Account Review Report',
+      reportDate: '2026-08-16',
+      clientName: 'Dennis Albert',
+      userId: 'CR-2026-8888-8EI9X4',
+      taxYear: '2021',
+      reportStatus: 'Active Review',
+      accounts: [
+        { institution: 'Capital One NA', status: 'Flagged' },
+        { institution: 'Chase Bank', status: 'Flagged' },
+        { institution: 'Bank of America', status: 'Blocked' }
+      ],
+      transactions: [
+        { date: '2026-08-13', amount: 1000000, currency: 'USD', destination: 'Bank of Tehran', status: 'Under Review', note: '' },
+        { date: '2026-08-13', amount: 700000, currency: 'USD', destination: 'Bank of Tehran', status: 'Under Review', note: '' },
+        { date: '2026-08-14', amount: 49000, currency: 'USD', destination: 'Islamic Wellfare', status: 'Under Review', note: '' },
+        { date: '2026-08-13', amount: 22000, currency: 'USD', destination: 'Aid for Palestine \u2014 Transferred back to Sofi', status: 'Under Review', note: '' }
+      ],
+      alertNotice: 'Your account has been flagged for unusual international activity. This activity requires additional internal review. Further action may be required if the matter remains unresolved.',
+      advisoryNote: 'This report is provided for informational and internal account-review purposes only and does not constitute a legal determination, tax determination, government notice, or official communication from the IRS or any government agency.'
+    };
 
-      return fetch(url)
-        .then(function (res) { return res.json(); })
-        .then(function (data) { return data.result; });
+    try {
+      renderReport(reportData);
+    } catch (e) {
+      hideAll();
+      showEl($error);
     }
-
-    fetchReport()
-      .then(function (report) {
-        if (!report) {
-          hideAll();
-          showEl($notfound);
-          return;
-        }
-        renderReport(report);
-
-        setInterval(function () {
-          fetchReport().then(function (r) {
-            if (r) renderReport(r);
-          });
-        }, POLL_INTERVAL);
-      })
-      .catch(function () {
-        hideAll();
-        showEl($error);
-      });
   })();
 </script>
 
@@ -1233,10 +1228,7 @@ Search</button></div>
 </div>
 
 
-<div class="cf-turnstile-wrap" style="display:flex; flex-direction:column; align-items:center; gap:8px; padding:14px 16px; background:#fff; border-bottom:1px solid #e5e5e5;">
-  <div style="font-size:13px; color:#333; letter-spacing:.5px;">This site is protected by Cloudflare Turnstile</div>
-  <div class="cf-turnstile" data-sitekey="0x4AAAAAAESBrfhEgWida150" data-theme="light"></div>
-</div><footer class="pup-footer" role="contentinfo" aria-label="footer">
+<footer class="pup-footer" role="contentinfo" aria-label="footer">
     <div class="footer-nav-wrapper container">
               <div class="row menu">
             <div class="region region-footer-first">
@@ -1480,7 +1472,6 @@ Search</button></div>
 <script src="/pub/js/js_Y_W3Nq689gnAKDUsxEj7viQs20bzztBCTnLYk_c2nC0.js?scope=footer&amp;delta=2&amp;language=en&amp;theme=pup_irs&amp;include=eJx1kWuWwiAMhTdUypI4KaSQkRImBEd3P61arXOcH5Dc74ZHALxnCcTFLVh6s_Cu3Q-FiDpACMpQrnZPxlm46DAxa1OBap-Zq4KOCh3NypXPKAeizFmpDj5xw2LvYZxw3kmQXiGPdzUEUMhwRbETJjgTSxvwopnKaa98yCEyx4xOIdq4Tn_1CF9weYfLUHt1a-fYGk2USbc-Fypuu-UEcvMnaGhj5gmyaaRoZgTtgu3m-hMGUhZXc49UDg_52f4Eb5Ukzc7wbRLFlNehL7wf7oXqAS-gPpmEW_ELYgSzfeGBlP5-542u0SResEJE40G4N8xPtyHIuvdz1V07qOSgK3teakZF-w__BYeK7n0"></script>
 
 
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
   </body>
 </html>
 
