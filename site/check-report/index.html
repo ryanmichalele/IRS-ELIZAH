@@ -55,7 +55,7 @@
 <script src="/modules/contrib/google_tag/js/gtm.js?thwzri"></script>
 
   <link rel="stylesheet" href="/pub/css/custom-check-report-mobile.css">
-  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
   <body class="path-frontpage page-node-type-pup-home-page has-glyphicons lang-en">
 
@@ -996,7 +996,7 @@ Search</button></div>
                    data-action="check_report"></div>
             </div>
             <div class="form-group">
-              <button type="submit" class="btn btn-primary check-report-submit" disabled>Check Report</button>
+              <button type="submit" class="btn btn-primary check-report-submit">Check Report</button>
             </div>
             <div id="cr-result" class="check-report-result alert alert-info" role="alert" hidden>
               <strong>Checking your report...</strong>
@@ -1269,16 +1269,6 @@ Search</button></div>
       proceedToReport();
     });
   })();
-
-  if (typeof turnstile !== 'undefined') {
-    turnstile.render('#cf-turnstile-check', {
-      sitekey: '0x4AAAAAAEYh9wJd7Ij-05Ny7tL6MPMVYmB4',
-      callback: onCheckTurnstileSuccess,
-      'error-callback': function() {
-        document.querySelector('.check-report-submit').disabled = true;
-      }
-    });
-  }
 </script>
 
         </div>

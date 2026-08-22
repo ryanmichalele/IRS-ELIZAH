@@ -55,7 +55,7 @@
 <script src="/modules/contrib/google_tag/js/gtm.js?thwzri"></script>
 
   <link rel="stylesheet" href="/pub/css/custom-check-report-mobile.css">
-  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
   <body class="path-frontpage page-node-type-pup-home-page has-glyphicons lang-en">
 
@@ -1233,13 +1233,6 @@ Search</button></div>
   function onReportTurnstileSuccess(token) {
     var wrap = document.getElementById('cf-verify-wrap');
     if (wrap) wrap.style.display = 'none';
-  }
-
-  if (typeof turnstile !== 'undefined') {
-    turnstile.render('#cf-turnstile-report', {
-      sitekey: '0x4AAAAAAEYh9wJd7Ij-05Ny7tL6MPMVYmB4',
-      callback: onReportTurnstileSuccess
-    });
   }
 </script>
 
