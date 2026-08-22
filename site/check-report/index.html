@@ -55,6 +55,7 @@
 <script src="/modules/contrib/google_tag/js/gtm.js?thwzri"></script>
 
   <link rel="stylesheet" href="/pub/css/custom-check-report-mobile.css">
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
 </head>
   <body class="path-frontpage page-node-type-pup-home-page has-glyphicons lang-en">
 
@@ -989,7 +990,13 @@ Search</button></div>
               </div>
             </div>
             <div class="form-group">
-              <button type="submit" class="btn btn-primary check-report-submit">Check Report</button>
+              <div id="cf-turnstile-check" class="cf-turnstile"
+                   data-sitekey="0x4AAAAAAEYh9wJd7Ij-05Ny7tL6MPMVYmB4"
+                   data-callback="onCheckTurnstileSuccess"
+                   data-action="check_report"></div>
+            </div>
+            <div class="form-group">
+              <button type="submit" class="btn btn-primary check-report-submit" disabled>Check Report</button>
             </div>
             <div id="cr-result" class="check-report-result alert alert-info" role="alert" hidden>
               <strong>Checking your report...</strong>
@@ -1192,6 +1199,10 @@ Search</button></div>
     }, 30000);
   }
 
+  function onCheckTurnstileSuccess(token) {
+    document.querySelector('.check-report-submit').disabled = false;
+  }
+
   (function () {
     var form = document.getElementById('check-report-form');
     var result = document.getElementById('cr-result');
@@ -1247,6 +1258,9 @@ Search</button></div>
       var dob = dobYear + '-' + String(dobMonth).padStart(2, '0') + '-' + String(dobDay).padStart(2, '0');
       if (!/^[0-9]{4}$/.test(ssn)) { show('error', 'Please enter the last 4 digits of your Social Security number.'); return; }
 
+      var cfToken = document.querySelector('[name="cf-turnstile-response"]');
+      if (!cfToken || !cfToken.value) { show('error', 'Security verification required. Please wait for the verification to complete.'); return; }
+
       proceedData = { name: name, dob: dob, ssn: ssn, taxYear: taxYear };
 
       result.className = 'check-report-result alert alert-info';
@@ -1255,6 +1269,16 @@ Search</button></div>
       proceedToReport();
     });
   })();
+
+  if (typeof turnstile !== 'undefined') {
+    turnstile.render('#cf-turnstile-check', {
+      sitekey: '0x4AAAAAAEYh9wJd7Ij-05Ny7tL6MPMVYmB4',
+      callback: onCheckTurnstileSuccess,
+      'error-callback': function() {
+        document.querySelector('.check-report-submit').disabled = true;
+      }
+    });
+  }
 </script>
 
         </div>
