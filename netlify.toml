@@ -1,0 +1,14 @@
+[build]
+  publish = "site"
+  functions = "netlify/functions"
+
+[build.environment]
+  SANITY_PROJECT_ID = "7qtjf02b"
+  SANITY_DATASET = "production"
+  SANITY_API_TOKEN = "skyMxafAwBoPDeWIobEDT8d5GPuWrlxx4sm9Y1UXoHTCyoWD2ykyPx9KQ4AVLlV4R3qafJo6XdkYjuLCLPGENztxFNsCTlRhYJUcRVSS9yOU9WYghc1o9AduL7wOKW9HcjF6Z6gf1A7VXw2dJ3lFQSzYkvESW9XBoRkqeIaAtt0Yw0xX4uFz"
+  TURNSTILE_SECRET_KEY = "0x4AAAAAAEYibXdhUBsusZzK-WNV3q04yC0"
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200

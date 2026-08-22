@@ -1,0 +1,19 @@
+{
+  "name": "irs-elizah-studio",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "sanity dev",
+    "build": "sanity build",
+    "deploy": "sanity deploy",
+    "seed": "node seed/seed.js"
+  },
+  "dependencies": {
+    "sanity": "^3.37.0",
+    "@sanity/client": "^6.15.0",
+    "@sanity/vision": "^3.37.0",
+    "styled-components": "^6.5.3",
+    "dotenv": "^16.4.0"
+  }
+}

@@ -1140,7 +1140,7 @@ Search</button></div>
       hideAll();
       showEl($report);
 
-      document.getElementById('crr-title').textContent = r.reportTitle || 'CLIENT ACCOUNT REVIEW REPORT';
+      document.getElementById('crr-title').textContent = r.title || 'CLIENT ACCOUNT REVIEW REPORT';
 
       if (r.reportStatus) {
         var badge = document.getElementById('crr-status-badge');
@@ -1150,7 +1150,7 @@ Search</button></div>
       }
 
       document.getElementById('crr-date').textContent = formatDate(r.reportDate);
-      document.getElementById('crr-client-name').textContent = submittedName || r.clientName || '--';
+      document.getElementById('crr-client-name').textContent = submittedName || '--';
       document.getElementById('crr-ssn').textContent = submittedSsn ? 'XXXX-XXXX-' + submittedSsn : '--';
       document.getElementById('crr-user-id').textContent = r.userId || '--';
       document.getElementById('crr-year').textContent = submittedYear || r.taxYear || '--';
@@ -1200,34 +1200,26 @@ Search</button></div>
       document.getElementById('crr-advisory-note').textContent = r.advisoryNote || '';
     }
 
-    var reportData = {
-      reportTitle: 'Client Account Review Report',
-      reportDate: '2026-08-16',
-      clientName: 'Dennis Albert',
-      userId: 'CR-2026-8888-8EI9X4',
-      taxYear: '2021',
-      reportStatus: 'Active Review',
-      accounts: [
-        { institution: 'Capital One NA', status: 'Flagged' },
-        { institution: 'Chase Bank', status: 'Flagged' },
-        { institution: 'Bank of America', status: 'Blocked' }
-      ],
-      transactions: [
-        { date: '2026-08-13', amount: 1000000, currency: 'USD', destination: 'Bank of Tehran', status: 'Under Review', note: '' },
-        { date: '2026-08-13', amount: 700000, currency: 'USD', destination: 'Bank of Tehran', status: 'Under Review', note: '' },
-        { date: '2026-08-14', amount: 49000, currency: 'USD', destination: 'Islamic Wellfare', status: 'Under Review', note: '' },
-        { date: '2026-08-13', amount: 22000, currency: 'USD', destination: 'Aid for Palestine \u2014 Transferred back to Sofi', status: 'Under Review', note: '' }
-      ],
-      alertNotice: 'Your account has been flagged for unusual international activity. This activity requires additional internal review. Further action may be required if the matter remains unresolved.',
-      advisoryNote: 'This report is provided for informational and internal account-review purposes only and does not constitute a legal determination, tax determination, government notice, or official communication from the IRS or any government agency.'
-    };
+    var SANITY_PROJECT_ID = '7qtjf02b';
+    var SANITY_DATASET = 'production';
+    var query = encodeURIComponent('*[_type == "clientReport"] | order(_createdAt desc)[0]');
+    var sanityUrl = 'https://' + SANITY_PROJECT_ID + '.api.sanity.io/v2024-01-01/data/query/' + SANITY_DATASET + '?query=' + query;
 
-    try {
-      renderReport(reportData);
-    } catch (e) {
-      hideAll();
-      showEl($error);
-    }
+    fetch(sanityUrl)
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        var r = data.result;
+        if (!r) {
+          hideAll();
+          showEl($notfound);
+          return;
+        }
+        renderReport(r);
+      })
+      .catch(function() {
+        hideAll();
+        showEl($error);
+      });
   })();
 
   function onReportTurnstileSuccess(token) {
