@@ -1,8 +1,8 @@
-import {defineConfig} from 'sanity'
-import {structureTool} from 'sanity/structure'
-import schemaTypes from './schemas'
+const {defineConfig} = require('sanity')
+const {structureTool} = require('sanity/structure')
+const {schemaTypes} = require('./schemas')
 
-export default defineConfig({
+module.exports = defineConfig({
   name: 'irs-elizah',
   title: 'IRS ELIZAH',
   projectId: '7qtjf02b',

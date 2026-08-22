@@ -1,12 +1,11 @@
-import {createClient} from '@sanity/client'
-import dotenv from 'dotenv'
-
-dotenv.config()
+require('dotenv').config()
+const {createClient} = require('@sanity/client')
 
 const client = createClient({
   projectId: process.env.SANITY_PROJECT_ID || '7qtjf02b',
   dataset: process.env.SANITY_DATASET || 'production',
   useCdn: false,
+  apiVersion: '2024-01-01',
   token: process.env.SANITY_API_TOKEN || 'skVNA8iq8BVYWnCA8t9DpeEnRbsUF99RK8TQKEYXpwbm8svuX8OtZfKxrctOAUNsKV0yuFwNkPLvZ95UA2dBKOVNI5OJZNUVhmLHvD2cfuCY8aU6Iu70mk6vDMQ7j28pWNdq9l4AKKsO6HHq0uHXaUBGBxnAPykcGCdE8JdNUrxEcMmrUpeI',
 })
 
@@ -64,7 +63,7 @@ const seedData = {
 
 async function seed() {
   try {
-    const result = client.create(seedData)
+    const result = await client.create(seedData)
     console.log('Seeded client report:', result._id)
   } catch (err) {
     console.error('Seed failed:', err.message)

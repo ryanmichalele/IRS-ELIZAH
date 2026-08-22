@@ -1,3 +1,3 @@
-import clientReport from './clientReport'
+const clientReport = require('./clientReport')
 
-export const schemaTypes = [clientReport]
+module.exports = {schemaTypes: [clientReport]}
